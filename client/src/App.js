@@ -3,7 +3,7 @@ import "./App.css";
 import Home from "./views/Home";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Registration from "./views/Registration";
-import Ranking from "./views/Ranking";
+import Ranking from "./views/PlayerRank";
 
 function App() {
   return (

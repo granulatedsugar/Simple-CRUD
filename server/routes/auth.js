@@ -1,21 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const dotenv = require("dotenv");
-const mysql = require("mysql");
-const { response } = require("express");
-
-dotenv.config();
-const HOST = process.env.MYSQL_HOST;
-const SQL_USER = process.env.SQL_USER;
-const SQL_PASSWORD = process.env.SQL_PASSWORD;
-const SQL_DATABASE = process.env.SQL_DATABASE;
-
-const db = mysql.createConnection({
-  host: HOST,
-  user: SQL_USER,
-  password: SQL_PASSWORD,
-  database: SQL_DATABASE,
-});
+const db = require("./mySql");
 
 // Registration
 router.post("/register", (req, res) => {
@@ -31,16 +16,13 @@ router.post("/register", (req, res) => {
         "INSERT INTO login (userid, user_pass, birthdate, email, sex) VALUES (?, ?, ?, ?, ?)",
         [userid, user_pass, birthdate, email, sex]
       );
-      console.log("User added.");
-      res.send("Values Inserted");
-      // response.status(200).send({ status: 200, message: "User added." });
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json");
+      res.json({ success: true, status: "Registration Successful!" });
     } else {
-      console.log("User found successfully.");
-      res.send("Email already registered");
-
-      // response
-      //   .status(200)
-      //   .json({ status: 200, message: "User found successfully." });
+      res.statusCode = 500;
+      res.setHeader("Content-Type", "application/json");
+      res.json({ err: err });
     }
   });
 });

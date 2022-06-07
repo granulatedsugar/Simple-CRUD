@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   Box,
   Button,
@@ -18,11 +19,16 @@ import { MdOutlineEmail } from "react-icons/md";
 import { CONFETTI_DARK, CONFETTI_LIGHT } from "./confetti";
 import { LockIcon } from "@chakra-ui/icons";
 import { Radio, RadioGroup } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import axios from "axios";
+
+const validEmail = (val) =>
+  /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(val);
 
 const Registration = () => {
   const [inputs, setInputs] = useState({});
   const [value, setValue] = React.useState("1"); // RADIO
+  const toast = useToast();
 
   const handleChange = (e) => {
     setInputs((prev) => {
@@ -30,17 +36,52 @@ const Registration = () => {
     });
   };
 
+  const emailValidation = () => {
+    const regex =
+      /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+    if (!inputs.email || regex.test(inputs.email) === false) {
+      toast({
+        title: "Try again.",
+        description: "Enter a valid email.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    axios
-      .post("http://localhost:3001/auth/register", {
-        ...inputs,
-        sex: value,
-      })
-      .then(() => {
-        console.log("Success");
-      });
+    if (emailValidation()) {
+      axios
+        .post("http://localhost:3001/auth/register", {
+          ...inputs,
+          sex: value,
+        })
+        .then(() => {
+          toast({
+            title: "Account created.",
+            description: "We've created your account for you.",
+            status: "success",
+            duration: 9000,
+            isClosable: true,
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: "Try again.",
+            description:
+              "Cannot create account. Email already registered.\n" +
+              error.message,
+            status: "error",
+            duration: 9000,
+            isClosable: true,
+          });
+        });
+    }
   };
 
   console.log({ ...inputs, sex: value });
@@ -135,6 +176,7 @@ const Registration = () => {
                         name="email"
                         placeholder="Your Email"
                         onChange={handleChange}
+                        validators={{ validEmail }}
                       />
                     </InputGroup>
                   </FormControl>
@@ -144,7 +186,6 @@ const Registration = () => {
                       <Stack direction="row">
                         <Radio value="M">Male</Radio>
                         <Radio value="F">Female</Radio>
-                        <Radio value="O">Other</Radio>
                       </Stack>
                     </RadioGroup>
                   </FormControl>
